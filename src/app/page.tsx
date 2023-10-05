@@ -14,7 +14,7 @@ export default function Home() {
   const { register, handleSubmit } = useForm();
 
   return (
-    <main className="w-screen h-screen flex flex-col items-center px-8 pb-4 pt-32 text-center">
+    <main className="w-screen h-screen flex flex-col items-center px-8 pb-4 pt-32 text-center overflow-hidden">
       <h1 className="font-normal text-slate-200 text-4xl">
         Seja bem-vindo ao{" "}
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">

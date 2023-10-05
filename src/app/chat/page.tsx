@@ -39,7 +39,7 @@ export default function Chat() {
   }, [router]);
 
   return (
-    <main className="flex flex-col p-2 w-screen h-screen">
+    <main className="flex flex-col p-2 w-screen h-screen overflow-hidden">
       <div className="flex-grow flex flex-col overflow-y-auto">
         <div>
           <h1>Message 1</h1>
