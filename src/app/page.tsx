@@ -7,6 +7,9 @@ export default function Home() {
   const router = useRouter();
 
   const handleFormSumbit = (values: FieldValues) => {
+    if(!values.name) {
+      return
+    }
     const user = {
       name: values.name,
       id: Math.random().toString(36).substring(2, 10),

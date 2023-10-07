@@ -74,7 +74,7 @@ export default function Chat() {
       setMessageHistory(JSON.parse(previousMessages));
     }
 
-    const ws = new WebSocket("ws://go-websocket.onrender.com/ws");
+    const ws = new WebSocket("wss://go-websocket.onrender.com/ws");
 
     ws.onopen = () => {
       console.log("WebSocket successfully connected!");
