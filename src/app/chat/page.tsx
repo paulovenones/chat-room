@@ -69,13 +69,12 @@ export default function Chat() {
     setUser(JSON.parse(storedUser));
 
     const previousMessages = localStorage.getItem("message_history");
-    console.log({ previousMessages });
 
     if (previousMessages && previousMessages.length) {
       setMessageHistory(JSON.parse(previousMessages));
     }
 
-    const ws = new WebSocket("ws://localhost:8080/ws");
+    const ws = new WebSocket("ws://go-websocket.onrender.com/ws");
 
     ws.onopen = () => {
       console.log("WebSocket successfully connected!");
