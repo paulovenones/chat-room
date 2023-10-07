@@ -1,18 +1,14 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import { FieldValues, UseFormRegister } from "react-hook-form";
+import { FieldValues, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { IoSend } from "react-icons/io5";
 
 interface Props {
   register: UseFormRegister<FieldValues>;
   setMessage: (message: string) => void;
-  triggerSendMessage: () => void;
+  onSendMessage: UseFormHandleSubmit<FieldValues, undefined>
 }
 
-const MessageInput: React.FC<Props> = ({
-  register,
-  setMessage,
-  triggerSendMessage,
-}) => {
+const MessageInput: React.FC<Props> = ({ register, setMessage }) => {
   const [isMessageInputFilled, setIsMessageInputFilled] = useState(false);
 
   useEffect(() => {
@@ -33,14 +29,9 @@ const MessageInput: React.FC<Props> = ({
         inputMode="text"
         onInput={onChangeMessage}
         data-placeholder="Digite uma mensagem"
-        id="message-input"
       />
       {isMessageInputFilled && (
-        <button
-          type="button"
-          onClick={triggerSendMessage}
-          className="bg-gradient-to-r from-pink-500 to-violet-500 px-3 py-3 flex items-center justify-center rounded-full ml-2 cursor-pointer"
-        >
+        <button className="bg-gradient-to-r from-pink-500 to-violet-500 px-3 py-3 flex items-center justify-center rounded-full bg-red-950 ml-2 pointer-events-none cursor-pointer">
           <IoSend />
         </button>
       )}

@@ -7,14 +7,19 @@ export default function Home() {
   const router = useRouter();
 
   const handleFormSumbit = (values: FieldValues) => {
-    localStorage.setItem("name", values.name);
+    const user = {
+      name: values.name,
+      id: Math.random().toString(36).substring(2, 10),
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
     router.push("/chat");
   };
 
   const { register, handleSubmit } = useForm();
 
   return (
-    <main className="w-screen h-screen flex flex-col items-center px-8 pb-4 pt-32 text-center overflow-hidden">
+    <main className="w-screen h-full flex flex-col items-center px-8 pb-4 pt-32 text-center overflow-hidden">
       <h1 className="font-normal text-slate-200 text-4xl">
         Seja bem-vindo ao{" "}
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">

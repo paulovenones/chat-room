@@ -1,37 +1,96 @@
 "use client";
 
+import Message from "@/components/Message";
 import MessageInput from "@/components/MessageInput";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+
+interface IAuthor {
+  name: string;
+  id: string;
+}
+
+export interface IMessage {
+  text: string;
+  date: string;
+  author: IAuthor;
+}
 
 export default function Chat() {
+  const wsRef = useRef<WebSocket | null>(null);
+
   const router = useRouter();
 
-  const { register, handleSubmit, setValue } = useForm();
+  const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
+  const [user, setUser] = useState<IAuthor | null>(null);
+
+  const { reset, register, handleSubmit, setValue } = useForm();
 
   const setMessage = (message: string) => {
     setValue("message", message, { shouldValidate: true });
   };
 
-  useEffect(() => {
-    const name = localStorage.getItem("name");
+  const storeNewMessage = (message: IMessage) => {
+    setMessageHistory((prevMessageHistory) => [...prevMessageHistory, message]);
+    localStorage.setItem("message_history", JSON.stringify(messageHistory));
+  };
 
-    if (!name) {
+  const onSendMessage = (values: FieldValues) => {
+    const newMessage: IMessage = {
+      text: values.message,
+      date: new Date().toISOString(),
+      author: user!,
+    };
+
+    storeNewMessage(newMessage);
+
+    wsRef.current?.send(JSON.stringify(newMessage));
+  };
+
+  const triggerSendMessage = () => {
+    const messageInput = document.getElementById("message-input");
+    if (messageInput) {
+      messageInput.textContent = "";
+    }
+
+    handleSubmit(onSendMessage)();
+    reset();
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
       router.push("/");
       return;
     }
 
+    setUser(JSON.parse(storedUser));
+
+    const previousMessages = localStorage.getItem("message_history");
+    console.log({ previousMessages });
+
+    if (previousMessages && previousMessages.length) {
+      setMessageHistory(JSON.parse(previousMessages));
+    }
+
     const ws = new WebSocket("ws://localhost:8080/ws");
+
     ws.onopen = () => {
       console.log("WebSocket successfully connected!");
-      ws.send(
-        JSON.stringify({
-          action: "joining",
-          user: name,
-        }),
-      );
     };
+
+    ws.onmessage = (event) => {
+      const message: IMessage = JSON.parse(event.data);
+      if (message.author.id === JSON.parse(storedUser).id) {
+        return;
+      }
+
+      storeNewMessage(message);
+    };
+
+    wsRef.current = ws;
 
     return () => {
       ws.close();
@@ -39,37 +98,24 @@ export default function Chat() {
   }, [router]);
 
   return (
-    <main className="flex flex-col p-2 w-screen h-screen overflow-hidden">
-      <div className="flex-grow flex flex-col overflow-y-auto">
+    <main className="flex flex-col w-screen h-full overscroll-none">
+      <div className="text-white pb-4 pt-2 px-2 flex-grow flex-shrink overflow-y-auto">
         <div>
-          <h1>Message 1</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
-          <h1>Message 2</h1>
+          {messageHistory.map((message, index) => (
+            <Message
+              isOwner={message.author.id === user?.id}
+              message={message}
+              key={index}
+            />
+          ))}
         </div>
       </div>
-
-      <div>
-        <MessageInput register={register} setMessage={setMessage} />
+      <div className="bg-gray-700 p-2">
+        <MessageInput
+          triggerSendMessage={triggerSendMessage}
+          register={register}
+          setMessage={setMessage}
+        />
       </div>
     </main>
   );
